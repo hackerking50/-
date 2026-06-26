@@ -1,0 +1,373 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.app{max-width:680px;margin:0 auto;font-family:var(--font-sans)}
+.screen{display:none;padding:1.25rem}
+.screen.active{display:block}
+.logo{text-align:center;padding-top:1.25rem;margin-bottom:1.5rem}
+.logo h1{font-size:26px;font-weight:500;color:var(--text-primary);letter-spacing:-0.5px}
+.logo p{font-size:13px;color:var(--text-muted);margin-top:3px}
+.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem}
+.style-card{border:0.5px solid var(--border);border-radius:12px;padding:1.1rem 0.6rem;text-align:center;cursor:pointer;background:var(--surface-2);transition:transform 0.1s,border-color 0.15s}
+.style-card:hover{border-color:var(--border-strong);transform:translateY(-2px)}
+.style-card.normal{border-top:3px solid #7F77DD}
+.style-card.webtoon{border-top:3px solid #1D9E75}
+.style-card.threed{border-top:3px solid #D85A30}
+.style-card .ico{font-size:32px;display:block;margin-bottom:6px}
+.style-card .nm{font-size:13px;font-weight:500;color:var(--text-primary)}
+.style-card .ds{font-size:11px;color:var(--text-muted);margin-top:3px;line-height:1.4}
+.cam-wrap{background:#0a0a0a;border-radius:12px;aspect-ratio:4/3;position:relative;overflow:hidden;margin-bottom:10px;display:flex;align-items:center;justify-content:center}
+.cam-wrap video{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.flash{position:absolute;inset:0;background:white;opacity:0;pointer-events:none;transition:opacity 0.05s;border-radius:12px}
+.flash.on{opacity:1}
+.cdown{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);font-size:80px;font-weight:500;color:white;border-radius:12px}
+.sbadge{position:absolute;top:10px;left:10px;padding:3px 9px;border-radius:var(--radius);font-size:12px;font-weight:500}
+.bn{background:#EEEDFE;color:#3C3489}
+.bw{background:#E1F5EE;color:#085041}
+.b3{background:#FAECE7;color:#712B13}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:8px}
+.thumb{aspect-ratio:3/4;border-radius:8px;background:var(--surface-1);border:0.5px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb canvas{width:100%;height:100%;object-fit:cover}
+.thumb .tnum{font-size:11px;color:var(--text-muted)}
+.thumb.done{border-color:var(--border-accent)}
+.thumb.cur{border:2px solid var(--border-accent)}
+.pbar{height:4px;background:var(--surface-1);border-radius:2px;margin-bottom:10px;overflow:hidden}
+.pfill{height:100%;background:var(--fill-accent);border-radius:2px;transition:width 0.3s}
+.hint{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:10px}
+.shutter-row{display:flex;align-items:center;justify-content:center}
+.shbtn{width:68px;height:68px;border-radius:50%;background:white;border:4px solid #ddd;cursor:pointer;transition:transform 0.1s;box-shadow:0 0 0 6px rgba(255,255,255,0.12)}
+.shbtn:hover{transform:scale(1.05)}
+.shbtn:active{transform:scale(0.92)}
+.shbtn:disabled{opacity:0.35;cursor:not-allowed}
+.back{font-size:13px;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;gap:4px;margin-bottom:10px}
+.back:hover{color:var(--text-primary)}
+.ai-bar{background:var(--bg-accent);border:0.5px solid var(--border-accent);border-radius:var(--radius);padding:11px 14px;margin-bottom:12px;font-size:13px;color:var(--text-accent);display:flex;align-items:center;gap:8px}
+.spin{width:13px;height:13px;border:2px solid var(--border-accent);border-top-color:var(--text-accent);border-radius:50%;animation:sp 0.8s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.btn{display:block;width:100%;padding:13px;border-radius:var(--radius);font-size:14px;font-weight:500;cursor:pointer;border:0.5px solid var(--border-strong);background:var(--surface-2);color:var(--text-primary);transition:background 0.15s,transform 0.1s;text-align:center}
+.btn:hover{background:var(--surface-1)}
+.btn:active{transform:scale(0.98)}
+.btn-p{background:var(--fill-accent);color:var(--on-accent);border-color:transparent}
+.btn-p:hover{background:var(--fill-accent-hover)}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.sec-t{font-size:17px;font-weight:500;color:var(--text-primary);margin-bottom:3px}
+.sec-s{font-size:13px;color:var(--text-muted);margin-bottom:12px}
+
+.print-wrap{
+  background:#fff;
+  border:0.5px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  margin-bottom:6px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:8px;
+  gap:6px;
+}
+.cut-line{
+  width:100%;
+  border:none;
+  border-top:2px dashed #bbb;
+  margin:2px 0;
+  position:relative;
+}
+.cut-label{font-size:10px;color:#aaa;text-align:center;margin:-8px 0 2px;letter-spacing:1px}
+.strip-row{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%}
+.res-cell{aspect-ratio:3/4;overflow:hidden;border-radius:4px;background:#111}
+.res-cell canvas{width:100%;height:100%;display:block}
+.print-note{font-size:11px;color:var(--text-muted);text-align:center;margin-bottom:4px}
+</style>
+
+<div class="app">
+
+<div id="home" class="screen active">
+  <div class="logo">
+    <h1>AI 인생네컷</h1>
+    <p>컴퓨터동아리 × AI 포토부스</p>
+  </div>
+  <p class="sec-t" style="text-align:center;margin-bottom:3px">스타일을 선택하세요</p>
+  <p class="sec-s" style="text-align:center">4컷 촬영 후 4×6 용지 한 장에 인화 — 가위로 잘라 두 장으로</p>
+  <div class="style-grid">
+    <div class="style-card normal" onclick="pick('normal')">
+      <span class="ico">✨</span>
+      <div class="nm">일반</div>
+      <div class="ds">AI 피부·색감 보정</div>
+    </div>
+    <div class="style-card webtoon" onclick="pick('webtoon')">
+      <span class="ico">🎨</span>
+      <div class="nm">웹툰</div>
+      <div class="ds">윤곽선+평면채색 변환</div>
+    </div>
+    <div class="style-card threed" onclick="pick('threed')">
+      <span class="ico">🎮</span>
+      <div class="nm">3D 애니</div>
+      <div class="ds">픽사풍 색감 렌더링</div>
+    </div>
+  </div>
+  <p style="font-size:11px;color:var(--text-muted);text-align:center">카메라 접근 권한이 필요합니다</p>
+</div>
+
+<div id="camera" class="screen">
+  <div class="back" onclick="goHome()"><i class="ti ti-arrow-left" aria-hidden="true"></i> 처음으로</div>
+  <div class="cam-wrap" id="camWrap">
+    <video id="vid" autoplay playsinline muted></video>
+    <div class="flash" id="flash"></div>
+    <div class="cdown" id="cdown"></div>
+    <div class="sbadge" id="sbadge"></div>
+  </div>
+  <div class="strip" id="strip"></div>
+  <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
+  <p class="hint" id="hint">버튼을 눌러 촬영하세요 (1/4)</p>
+  <div class="shutter-row">
+    <button class="shbtn" id="shbtn" onclick="shoot()" aria-label="촬영"></button>
+  </div>
+</div>
+
+<div id="processing" class="screen">
+  <div class="logo" style="padding-top:1.5rem">
+    <h1 style="font-size:20px">AI 변환 중이에요</h1>
+    <p>잠시만 기다려주세요</p>
+  </div>
+  <div class="ai-bar"><div class="spin"></div><span id="pmsg">사진 분석 중...</span></div>
+  <div class="strip" id="pstrip"></div>
+</div>
+
+<div id="result" class="screen">
+  <div class="back" onclick="goHome()"><i class="ti ti-arrow-left" aria-hidden="true"></i> 다시 찍기</div>
+  <p class="sec-t">완성됐어요!</p>
+  <p class="sec-s">4×6 용지 한 장 — 점선에서 자르면 두 장이 돼요</p>
+  <p class="print-note">▼ 인화 미리보기</p>
+  <div class="print-wrap">
+    <div class="strip-row" id="row1"></div>
+    <div class="cut-label">✂ 여기서 자르세요</div>
+    <div class="cut-line"></div>
+    <div class="strip-row" id="row2"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn" onclick="printIt()"><i class="ti ti-printer" aria-hidden="true"></i> 인화하기</button>
+    <button class="btn btn-p" onclick="goHome()"><i class="ti ti-refresh" aria-hidden="true"></i> 다시 찍기</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+let style='normal', cnt=0, shots=[], stream=null, busy=false;
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+function goHome(){
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+  cnt=0;shots=[];
+  show('home');
+}
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+async function pick(s){
+  style=s;cnt=0;shots=[];
+  show('camera');
+  const b=document.getElementById('sbadge');
+  const names={normal:'일반',webtoon:'웹툰',threed:'3D 애니'};
+  const cls={normal:'bn',webtoon:'bw',threed:'b3'};
+  b.textContent=names[s];b.className='sbadge '+cls[s];
+  buildStrip('strip');
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:1280,height:960},audio:false});
+    document.getElementById('vid').srcObject=stream;
+  }catch(e){
+    document.getElementById('camWrap').innerHTML=`<div style="text-align:center;color:#666;padding:2rem"><i class="ti ti-camera-off" style="font-size:40px;display:block;margin-bottom:8px" aria-hidden="true"></i><p style="font-size:13px">카메라 연결 실패<br>${e.message}</p></div>`;
+  }
+}
+
+function buildStrip(id){
+  const el=document.getElementById(id);el.innerHTML='';
+  for(let i=0;i<4;i++){
+    const d=document.createElement('div');
+    d.className='thumb'+(i===0?' cur':'');
+    d.id=(id==='strip'?'th':'ph')+i;
+    d.innerHTML=`<span class="tnum">${i+1}컷</span>`;
+    el.appendChild(d);
+  }
+}
+
+async function shoot(){
+  if(busy||cnt>=4)return;
+  busy=true;
+  document.getElementById('shbtn').disabled=true;
+  const cd=document.getElementById('cdown');
+  cd.style.display='flex';
+  for(let i=3;i>=1;i--){cd.textContent=i;await sleep(850)}
+  cd.style.display='none';
+  const fl=document.getElementById('flash');
+  fl.classList.add('on');await sleep(80);fl.classList.remove('on');
+  const v=document.getElementById('vid');
+  const c=document.createElement('canvas');
+  c.width=v.videoWidth||640;c.height=v.videoHeight||480;
+  c.getContext('2d').drawImage(v,0,0);
+  shots.push(c.toDataURL('image/jpeg',0.93));
+  const th=document.getElementById('th'+cnt);
+  th.innerHTML='';th.classList.remove('cur');th.classList.add('done');
+  const im=document.createElement('img');im.src=shots[cnt];th.appendChild(im);
+  cnt++;
+  document.getElementById('pfill').style.width=(cnt/4*100)+'%';
+  if(cnt<4){
+    const nx=document.getElementById('th'+cnt);if(nx)nx.classList.add('cur');
+    document.getElementById('hint').textContent=`버튼을 눌러 촬영하세요 (${cnt+1}/4)`;
+    document.getElementById('shbtn').disabled=false;busy=false;
+  }else{
+    document.getElementById('hint').textContent='4컷 완료! 변환 중...';
+    await sleep(350);startProc();
+  }
+}
+
+async function startProc(){
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+  show('processing');buildStrip('pstrip');
+  shots.forEach((s,i)=>{
+    const t=document.getElementById('ph'+i);t.innerHTML='';t.classList.add('done');
+    const im=document.createElement('img');im.src=s;t.appendChild(im);
+  });
+  const msgs=['얼굴 윤곽 감지 중...','스타일 변환 적용 중...','색감 보정 중...','인화 레이아웃 생성 중...'];
+  for(const m of msgs){document.getElementById('pmsg').textContent=m;await sleep(850)}
+  showResult();
+}
+
+function showResult(){
+  show('result');
+  ['row1','row2'].forEach((rid,rowIdx)=>{
+    const row=document.getElementById(rid);row.innerHTML='';
+    for(let i=0;i<4;i++){
+      const cell=document.createElement('div');cell.className='res-cell';
+      const cv=document.createElement('canvas');cv.width=400;cv.height=533;
+      const ctx=cv.getContext('2d');
+      const img=new Image();
+      img.onload=()=>{ctx.drawImage(img,0,0,400,533);applyFx(ctx,style,400,533)};
+      img.src=shots[i];
+      cell.appendChild(cv);row.appendChild(cell);
+    }
+  });
+}
+
+function applyFx(ctx,s,w,h){
+  if(s==='webtoon') applyWebtoon(ctx,w,h);
+  else if(s==='threed') apply3D(ctx,w,h);
+  else applyNormal(ctx,w,h);
+}
+
+function applyNormal(ctx,w,h){
+  const d=ctx.getImageData(0,0,w,h);const px=d.data;
+  for(let i=0;i<px.length;i+=4){
+    px[i]=Math.min(255,px[i]*1.06+6);
+    px[i+1]=Math.min(255,px[i+1]*1.04+4);
+    px[i+2]=Math.min(255,px[i+2]*1.02+2);
+  }
+  ctx.putImageData(d,0,0);
+}
+
+function applyWebtoon(ctx,w,h){
+  const orig=ctx.getImageData(0,0,w,h);
+  const op=orig.data;
+
+  for(let i=0;i<op.length;i+=4){
+    const r=op[i],g=op[i+1],b=op[i+2];
+    op[i]=Math.min(255,r*1.15+10);
+    op[i+1]=Math.min(255,g*1.1+8);
+    op[i+2]=Math.min(255,b*1.08+5);
+    const sat=0.5;
+    const avg=(op[i]+op[i+1]+op[i+2])/3;
+    op[i]=Math.min(255,avg+(op[i]-avg)*(1+sat));
+    op[i+1]=Math.min(255,avg+(op[i+1]-avg)*(1+sat));
+    op[i+2]=Math.min(255,avg+(op[i+2]-avg)*(1+sat));
+    const lv=(op[i]*0.299+op[i+1]*0.587+op[i+2]*0.114);
+    const steps=6;
+    const q=Math.round(lv/255*steps)/steps*255;
+    const blend=0.55;
+    op[i]=Math.min(255,op[i]*(1-blend)+q*blend);
+    op[i+1]=Math.min(255,op[i+1]*(1-blend)+q*blend);
+    op[i+2]=Math.min(255,op[i+2]*(1-blend)+q*blend);
+  }
+  ctx.putImageData(orig,0,0);
+
+  const edgeData=ctx.getImageData(0,0,w,h);
+  const gray=new Float32Array(w*h);
+  for(let i=0;i<edgeData.data.length;i+=4){
+    gray[i/4]=(edgeData.data[i]*0.299+edgeData.data[i+1]*0.587+edgeData.data[i+2]*0.114);
+  }
+  const edge=new Float32Array(w*h);
+  const sobelX=[-1,0,1,-2,0,2,-1,0,1];
+  const sobelY=[-1,-2,-1,0,0,0,1,2,1];
+  for(let y=1;y<h-1;y++){
+    for(let x=1;x<w-1;x++){
+      let gx=0,gy=0;
+      for(let ky=-1;ky<=1;ky++){
+        for(let kx=-1;kx<=1;kx++){
+          const v=gray[(y+ky)*w+(x+kx)];
+          gx+=v*sobelX[(ky+1)*3+(kx+1)];
+          gy+=v*sobelY[(ky+1)*3+(kx+1)];
+        }
+      }
+      edge[y*w+x]=Math.sqrt(gx*gx+gy*gy);
+    }
+  }
+  const eImg=ctx.getImageData(0,0,w,h);
+  const ep=eImg.data;
+  const thresh=55;
+  for(let i=0;i<edge.length;i++){
+    if(edge[i]>thresh){
+      const pi=i*4;
+      ep[pi]=0;ep[pi+1]=0;ep[pi+2]=0;ep[pi+3]=255;
+    }
+  }
+  ctx.putImageData(eImg,0,0);
+}
+
+function apply3D(ctx,w,h){
+  const d=ctx.getImageData(0,0,w,h);const p=d.data;
+  for(let i=0;i<p.length;i+=4){
+    p[i]=Math.min(255,p[i]*1.12+15);
+    p[i+1]=Math.min(255,p[i+1]*1.08+12);
+    p[i+2]=Math.min(255,p[i+2]*1.18+20);
+    const lv=(p[i]*0.299+p[i+1]*0.587+p[i+2]*0.114);
+    const steps=8;
+    const q=Math.round(lv/255*steps)/steps*255;
+    const bl=0.35;
+    p[i]=Math.min(255,p[i]*(1-bl)+q*bl);
+    p[i+1]=Math.min(255,p[i+1]*(1-bl)+q*bl);
+    p[i+2]=Math.min(255,p[i+2]*(1-bl)+q*bl);
+    const sat=0.7;
+    const avg=(p[i]+p[i+1]+p[i+2])/3;
+    p[i]=Math.min(255,avg+(p[i]-avg)*(1+sat));
+    p[i+1]=Math.min(255,avg+(p[i+1]-avg)*(1+sat));
+    p[i+2]=Math.min(255,avg+(p[i+2]-avg)*(1+sat));
+  }
+  ctx.putImageData(d,0,0);
+  ctx.fillStyle='rgba(100,60,200,0.07)';ctx.fillRect(0,0,w,h);
+}
+
+function printIt(){
+  const win=window.open('','_blank');
+  if(!win){alert('팝업 차단을 해제해주세요');return}
+  const allCvs=[...document.getElementById('row1').querySelectorAll('canvas')];
+  const imgs=allCvs.map(c=>c.toDataURL('image/jpeg',0.95));
+  win.document.write(`<!DOCTYPE html><html><head><title>AI 인생네컷</title>
+  <style>
+    @page{size:4in 6in;margin:0}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{width:4in;height:6in;background:#fff;display:flex;flex-direction:column;align-items:stretch;padding:4px;gap:0}
+    .half{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;flex:1;min-height:0}
+    .half img{width:100%;height:100%;object-fit:cover;display:block}
+    .cut{border-top:1px dashed #aaa;margin:3px 0;flex-shrink:0}
+  </style></head><body onload="window.print()">
+  <div class="half">${imgs.map(s=>`<img src="${s}">`).join('')}</div>
+  <div class="cut"></div>
+  <div class="half">${imgs.map(s=>`<img src="${s}">`).join('')}</div>
+  </body></html>`);
+  win.document.close();
+}
+</script>

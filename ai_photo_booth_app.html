@@ -1,0 +1,522 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: var(--surface-0); }
+  
+  .app { max-width: 680px; margin: 0 auto; min-height: 600px; }
+  
+  .screen { display: none; padding: 1.5rem; }
+  .screen.active { display: block; }
+
+  .logo { text-align: center; margin-bottom: 2rem; padding-top: 1.5rem; }
+  .logo h1 { font-size: 28px; font-weight: 500; color: var(--text-primary); letter-spacing: -0.5px; }
+  .logo p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+  .style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+  .style-card {
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 0.75rem;
+    text-align: center;
+    cursor: pointer;
+    background: var(--surface-2);
+    transition: border-color 0.15s, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+  .style-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+  .style-card .icon { font-size: 36px; margin-bottom: 8px; display: block; }
+  .style-card .name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+  .style-card .desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+  .style-card.normal { border-top: 3px solid #7F77DD; }
+  .style-card.webtoon { border-top: 3px solid #1D9E75; }
+  .style-card.threed { border-top: 3px solid #D85A30; }
+
+  .camera-area {
+    background: #0a0a0a;
+    border-radius: 12px;
+    aspect-ratio: 4/3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .camera-area video, .camera-area canvas { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+  .camera-placeholder { text-align: center; color: #555; }
+  .camera-placeholder i { font-size: 48px; display: block; margin-bottom: 8px; }
+
+  .style-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 4px 10px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .badge-normal { background: #EEEDFE; color: #3C3489; }
+  .badge-webtoon { background: #E1F5EE; color: #085041; }
+  .badge-threed { background: #FAECE7; color: #712B13; }
+
+  .countdown {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.5);
+    font-size: 80px;
+    font-weight: 500;
+    color: white;
+    border-radius: 12px;
+    display: none;
+  }
+
+  .shot-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+  .shot-thumb {
+    aspect-ratio: 3/4;
+    border-radius: 8px;
+    background: var(--surface-1);
+    border: 0.5px solid var(--border);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .shot-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .shot-thumb .num {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+  .shot-thumb.done { border-color: var(--border-accent); }
+  .shot-thumb.active { border: 2px solid var(--border-accent); }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--surface-1);
+    border-radius: 2px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--fill-accent);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface-2);
+    color: var(--text-primary);
+    transition: background 0.15s, transform 0.1s;
+    text-align: center;
+  }
+  .btn:hover { background: var(--surface-1); }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: var(--fill-accent);
+    color: var(--on-accent);
+    border-color: transparent;
+  }
+  .btn-primary:hover { background: var(--fill-accent-hover); }
+  .btn-shutter {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: white;
+    border: 4px solid #ddd;
+    cursor: pointer;
+    margin: 0 auto;
+    display: block;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 0 0 6px rgba(255,255,255,0.15);
+  }
+  .btn-shutter:hover { transform: scale(1.05); }
+  .btn-shutter:active { transform: scale(0.93); }
+  .btn-shutter:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .shutter-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .shutter-hint { font-size: 13px; color: var(--text-muted); text-align: center; }
+
+  .back-btn {
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 1rem;
+  }
+  .back-btn:hover { color: var(--text-primary); }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    background: #222;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    aspect-ratio: 4/6;
+  }
+  .result-cell {
+    aspect-ratio: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .result-cell img { width: 100%; height: 100%; object-fit: cover; }
+  .result-cell canvas { width: 100%; height: 100%; object-fit: cover; }
+  .print-label {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .ai-status {
+    background: var(--bg-accent);
+    border: 0.5px solid var(--border-accent);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 1rem;
+    font-size: 13px;
+    color: var(--text-accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border-accent);
+    border-top-color: var(--text-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .flash {
+    position: absolute;
+    inset: 0;
+    background: white;
+    border-radius: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.05s;
+  }
+  .flash.on { opacity: 1; }
+
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .section-title { font-size: 18px; font-weight: 500; color: var(--text-primary); margin-bottom: 0.5rem; }
+  .section-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem; }
+</style>
+
+<div class="app">
+
+  <div id="home" class="screen active">
+    <div class="logo">
+      <h1>AI 인생네컷</h1>
+      <p>컴퓨터동아리 × AI 포토부스</p>
+    </div>
+    <p class="section-title" style="text-align:center; margin-bottom:0.25rem;">스타일을 선택하세요</p>
+    <p class="section-sub" style="text-align:center;">4장을 찍으면 4×6 용지에 자동 인화됩니다</p>
+    <div class="style-grid">
+      <div class="style-card normal" onclick="selectStyle('normal')">
+        <span class="icon">✨</span>
+        <div class="name">일반</div>
+        <div class="desc">AI 보정·피부 보정</div>
+      </div>
+      <div class="style-card webtoon" onclick="selectStyle('webtoon')">
+        <span class="icon">🎨</span>
+        <div class="name">웹툰</div>
+        <div class="desc">만화 스타일 변환</div>
+      </div>
+      <div class="style-card threed" onclick="selectStyle('threed')">
+        <span class="icon">🎮</span>
+        <div class="name">3D 애니</div>
+        <div class="desc">픽사풍 렌더링</div>
+      </div>
+    </div>
+    <p style="font-size:12px; color: var(--text-muted); text-align:center; margin-top:1rem;">
+      <i class="ti ti-info-circle" aria-hidden="true"></i>
+      카메라 접근 권한이 필요합니다
+    </p>
+  </div>
+
+  <div id="camera" class="screen">
+    <div class="back-btn" onclick="goHome()">
+      <i class="ti ti-arrow-left" aria-hidden="true"></i> 처음으로
+    </div>
+    <div class="camera-area" id="cameraArea">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="overlay" style="display:none; position:absolute; inset:0;"></canvas>
+      <div class="flash" id="flash"></div>
+      <div class="countdown" id="countdown"></div>
+      <div class="style-badge" id="styleBadge"></div>
+    </div>
+    <div class="shot-strip" id="shotStrip"></div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="shutter-hint" id="shutterHint">버튼을 눌러 촬영하세요 (1/4)</div>
+    <div class="shutter-area">
+      <button class="btn-shutter" id="shutterBtn" onclick="takeShot()" aria-label="촬영"></button>
+    </div>
+  </div>
+
+  <div id="processing" class="screen">
+    <div class="logo" style="padding-top:2rem;">
+      <h1 style="font-size:22px;">AI가 사진을 변환 중이에요</h1>
+      <p>잠시만 기다려주세요</p>
+    </div>
+    <div class="ai-status">
+      <div class="spinner"></div>
+      <span id="processMsg">사진 분석 중...</span>
+    </div>
+    <div class="shot-strip" id="processStrip"></div>
+  </div>
+
+  <div id="result" class="screen">
+    <div class="back-btn" onclick="goHome()">
+      <i class="ti ti-arrow-left" aria-hidden="true"></i> 다시 찍기
+    </div>
+    <p class="section-title">완성됐어요!</p>
+    <p class="section-sub">4×6 용지에 두 장씩 인화됩니다</p>
+    <p class="print-label">▼ 인화 미리보기 (4×6 레이아웃)</p>
+    <div class="result-grid" id="resultGrid"></div>
+    <div class="btn-row" style="margin-top:1rem;">
+      <button class="btn" onclick="printPhotos()"><i class="ti ti-printer" aria-hidden="true"></i> 인화하기</button>
+      <button class="btn btn-primary" onclick="goHome()"><i class="ti ti-refresh" aria-hidden="true"></i> 다시 찍기</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentStyle = 'normal';
+let shotCount = 0;
+let shots = [];
+let stream = null;
+let isShooting = false;
+
+const styleNames = { normal: '일반', webtoon: '웹툰', threed: '3D 애니' };
+const styleBadgeClass = { normal: 'badge-normal', webtoon: 'badge-webtoon', threed: 'badge-threed' };
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  shotCount = 0; shots = [];
+  showScreen('home');
+}
+
+async function selectStyle(style) {
+  currentStyle = style;
+  shotCount = 0; shots = [];
+  showScreen('camera');
+
+  const badge = document.getElementById('styleBadge');
+  badge.textContent = styleNames[style];
+  badge.className = 'style-badge ' + styleBadgeClass[style];
+
+  buildStrip('shotStrip');
+
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 1280, height: 960 }, audio: false });
+    document.getElementById('video').srcObject = stream;
+  } catch(e) {
+    document.getElementById('cameraArea').innerHTML = `<div class="camera-placeholder"><i class="ti ti-camera-off"></i><p style="font-size:13px;">카메라 접근 실패<br>${e.message}</p></div>`;
+  }
+}
+
+function buildStrip(containerId) {
+  const strip = document.getElementById(containerId);
+  strip.innerHTML = '';
+  for (let i = 0; i < 4; i++) {
+    const div = document.createElement('div');
+    div.className = 'shot-thumb' + (i === 0 ? ' active' : '');
+    div.id = (containerId === 'shotStrip' ? 'thumb' : 'pthumb') + i;
+    div.innerHTML = `<span class="num">${i+1}컷</span>`;
+    strip.appendChild(div);
+  }
+}
+
+async function takeShot() {
+  if (isShooting || shotCount >= 4) return;
+  isShooting = true;
+  document.getElementById('shutterBtn').disabled = true;
+
+  const cdEl = document.getElementById('countdown');
+  cdEl.style.display = 'flex';
+  for (let i = 3; i >= 1; i--) {
+    cdEl.textContent = i;
+    await sleep(900);
+  }
+  cdEl.style.display = 'none';
+
+  const flash = document.getElementById('flash');
+  flash.classList.add('on');
+  await sleep(80);
+  flash.classList.remove('on');
+
+  const video = document.getElementById('video');
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  shots.push(dataUrl);
+
+  const thumb = document.getElementById('thumb' + shotCount);
+  thumb.innerHTML = '';
+  thumb.classList.remove('active');
+  thumb.classList.add('done');
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  thumb.appendChild(img);
+
+  shotCount++;
+  updateProgress();
+
+  if (shotCount < 4) {
+    const next = document.getElementById('thumb' + shotCount);
+    if (next) next.classList.add('active');
+    document.getElementById('shutterHint').textContent = `버튼을 눌러 촬영하세요 (${shotCount+1}/4)`;
+    document.getElementById('shutterBtn').disabled = false;
+    isShooting = false;
+  } else {
+    document.getElementById('shutterHint').textContent = '4컷 완료! AI 변환 중...';
+    await sleep(400);
+    startProcessing();
+  }
+}
+
+function updateProgress() {
+  document.getElementById('progressFill').style.width = (shotCount / 4 * 100) + '%';
+}
+
+async function startProcessing() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  showScreen('processing');
+  buildStrip('processStrip');
+  shots.forEach((src, i) => {
+    const t = document.getElementById('pthumb' + i);
+    t.innerHTML = '';
+    t.classList.add('done');
+    const img = document.createElement('img');
+    img.src = src;
+    t.appendChild(img);
+  });
+
+  const msgs = ['사진 분석 중...', 'AI 스타일 변환 중...', '색상·조명 보정 중...', '인화 레이아웃 준비 중...'];
+  for (const msg of msgs) {
+    document.getElementById('processMsg').textContent = msg;
+    await sleep(900);
+  }
+
+  showResult();
+}
+
+function showResult() {
+  showScreen('result');
+  const grid = document.getElementById('resultGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < 4; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'result-cell';
+    const canvas = document.createElement('canvas');
+    canvas.width = 400;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, 400, 400);
+      applyStyle(ctx, currentStyle, 400, 400);
+    };
+    img.src = shots[i];
+    cell.appendChild(canvas);
+    grid.appendChild(cell);
+  }
+}
+
+function applyStyle(ctx, style, w, h) {
+  if (style === 'webtoon') {
+    const img = ctx.getImageData(0, 0, w, h);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const avg = (d[i]*0.299 + d[i+1]*0.587 + d[i+2]*0.114);
+      const edge = avg < 80 ? 0 : 255;
+      d[i] = Math.min(255, d[i]*1.2);
+      d[i+1] = Math.min(255, d[i+1]*1.15);
+      d[i+2] = Math.min(255, d[i+2]*1.1);
+    }
+    ctx.putImageData(img, 0, 0);
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, w, h);
+  } else if (style === 'threed') {
+    ctx.fillStyle = 'rgba(120,80,200,0.08)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.shadowColor = 'rgba(120,80,200,0.18)';
+    ctx.shadowBlur = 8;
+  } else {
+    const img = ctx.getImageData(0, 0, w, h);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      d[i] = Math.min(255, d[i]*1.08 + 8);
+      d[i+1] = Math.min(255, d[i+1]*1.05 + 5);
+      d[i+2] = Math.min(255, d[i+2]*1.02);
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+}
+
+function printPhotos() {
+  const win = window.open('', '_blank');
+  if (!win) { alert('팝업을 허용해주세요'); return; }
+  const canvases = document.getElementById('resultGrid').querySelectorAll('canvas');
+  const imgs = Array.from(canvases).map(c => c.toDataURL('image/jpeg', 0.95));
+  win.document.write(`<!DOCTYPE html><html><head><title>AI 인생네컷 인화</title>
+  <style>
+    @page { size: 4in 6in; margin: 0; }
+    body { margin: 0; padding: 0; }
+    .page { width: 4in; height: 6in; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; background: #222; }
+    .cell { overflow: hidden; }
+    .cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  </style></head><body onload="window.print()">
+  <div class="page">
+    ${imgs.map(s => `<div class="cell"><img src="${s}"></div>`).join('')}
+  </div>
+  </body></html>`);
+  win.document.close();
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
